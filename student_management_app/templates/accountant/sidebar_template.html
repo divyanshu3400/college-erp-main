@@ -1,0 +1,80 @@
+{% load static %}
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="" class="brand-link">
+      <img src="{% static 'dist/img/logo_rbc.png' %}" alt="Risebeyond Consultancy" class="brand-image img-circle elevation-3"
+           style="opacity: .8">
+      <span class="brand-text font-weight-light">Risebeyond Consultancy</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+          <img src="{% static 'dist/img/user2-160x160.jpg' %}" class="img-circle elevation-2" alt="User Image">
+        </div>
+        <div class="info">
+          <a href="{% url 'accountant_profile' %}" class="d-block">{% if user.first_name %}{{ user.first_name }}
+            {% else %}
+            {{ user.username }}
+          {% endif %}</a>
+        </div>
+      </div>
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+          <li class="nav-item">
+            {% url 'accountant_home' as accountant_home %}
+            <a href="{{ accountant_home }}" class="nav-link {% if request.path == accountant_home %} active {% endif %}">
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                Home
+              </p>
+            </a>
+          </li>
+          <!-- <li class="nav-item">
+            {% url 'accountant_take_attendance' as accountant_take_attendance %}
+            <a href="{{ accountant_take_attendance }}" class="nav-link {% if request.path == accountant_take_attendance %} active {% endif %}">
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                Take Attendance
+              </p>
+            </a>
+          </li> -->
+           <li class="nav-item">
+            {% url 'accountant_update_attendance' as accountant_update_attendance %}
+            <a href="{{ accountant_update_attendance }}" class="nav-link {% if request.path == accountant_update_attendance %} active {% endif %}">
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                Update Student Fee
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            {% url 'accountant_apply_leave' as accountant_apply_leave %}
+            <a href="{{ accountant_apply_leave }}" class="nav-link {% if request.path == accountant_apply_leave %} active {% endif %}">
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                Apply Leave
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            {% url 'accountant_feedback' as accountant_feedback %}
+            <a href="{{ accountant_feedback }}" class="nav-link {% if request.path == accountant_feedback %} active {% endif %}">
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                Feedback
+              </p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
