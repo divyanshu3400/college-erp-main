@@ -9,9 +9,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
 from student_management_app.forms import AddStudentForm, EditStudentForm
-from student_management_app.models import CustomUser, Staffs, Courses, Subjects, Students, SessionYearModel, \
-    FeedBackStudent, FeedBackStaffs, LeaveReportStudent, LeaveReportStaff, Attendance, AttendanceReport, \
-    NotificationStudent, NotificationStaffs
+from student_management_app.models import *
 
 
 def admin_home(request):
@@ -104,7 +102,6 @@ def add_course_save(request):
             messages.success(request,"Successfully Added Course")
             return HttpResponseRedirect(reverse("add_course"))
         except Exception as e:
-            print(e)
             messages.error(request,"Failed To Add Course")
             return HttpResponseRedirect(reverse("add_course"))
 
@@ -341,7 +338,6 @@ def edit_course_save(request):
 
         try:
             course=Courses.objects.get(id=course_id)
-            print(Courses.course_name)
             course.course_name=course_name
             course.save()
             messages.success(request,"Successfully Edited Course")
@@ -520,6 +516,11 @@ def admin_send_notification_staff(request):
     staffs=Staffs.objects.all()
     return render(request,"hod_template/staff_notification.html",{"staffs":staffs})
 
+def admin_send_notification_account(request):
+    account=Accountant.objects.all()
+    return render(request,"hod_template/account_notification.html",{"staffs":account})
+
+
 @csrf_exempt
 def send_student_notification(request):
     id=request.POST.get("id")
@@ -540,7 +541,6 @@ def send_student_notification(request):
     data=requests.post(url,data=json.dumps(body),headers=headers)
     notification=NotificationStudent(student_id=student,message=message)
     notification.save()
-    print(data.text)
     return HttpResponse("True")
 
 @csrf_exempt
@@ -549,6 +549,10 @@ def send_staff_notification(request):
     message=request.POST.get("message")
     staff=Staffs.objects.get(admin=id)
     token=staff.fcm_token
+    print(id)
+    print(message)
+    print(token)
+    print(staff)
     url="https://fcm.googleapis.com/fcm/send"
     body={
         "notification":{
@@ -563,5 +567,27 @@ def send_staff_notification(request):
     data=requests.post(url,data=json.dumps(body),headers=headers)
     notification=NotificationStaffs(staff_id=staff,message=message)
     notification.save()
-    print(data.text)
+    return HttpResponse("True")
+
+
+@csrf_exempt
+def send_account_notification(request):
+    id=request.POST.get("id")
+    message=request.POST.get("message")
+    staff=Accountant.objects.get(admin=id)
+    token=staff.fcm_token
+    url="https://fcm.googleapis.com/fcm/send"
+    body={
+        "notification":{
+            "title":"Student Management System",
+            "body":message,
+            "click_action":"https://studentmanagementsystem22.herokuapp.com/staff_all_notification",
+            "icon":"http://studentmanagementsystem22.herokuapp.com/static/dist/img/user2-160x160.jpg"
+        },
+        "to":token
+    }
+    headers={"Content-Type":"application/json","Authorization":"key=SERVER_KEY_HERE"}
+    data=requests.post(url,data=json.dumps(body),headers=headers)
+    notification=NotificationAccountant(accountant_id=staff,message=message)
+    notification.save()
     return HttpResponse("True")

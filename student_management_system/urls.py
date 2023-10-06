@@ -63,9 +63,11 @@ urlpatterns = [
     path('admin_profile', HodViews.admin_profile,name="admin_profile"),
     path('admin_profile_save', HodViews.admin_profile_save,name="admin_profile_save"),
     path('admin_send_notification_staff', HodViews.admin_send_notification_staff,name="admin_send_notification_staff"),
+    path('admin_send_notification_account', HodViews.admin_send_notification_account,name="admin_send_notification_account"),
     path('admin_send_notification_student', HodViews.admin_send_notification_student,name="admin_send_notification_student"),
     path('send_student_notification', HodViews.send_student_notification,name="send_student_notification"),
     path('send_staff_notification', HodViews.send_staff_notification,name="send_staff_notification"),
+    path('send_account_notification', HodViews.send_account_notification,name="send_account_notification"),
 
     #     Staff URL Path
     path('staff_home', StaffViews.staff_home, name="staff_home"),

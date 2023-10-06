@@ -1,5 +1,9 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -71,20 +75,48 @@ WSGI_APPLICATION = 'student_management_system.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        #=====Enable Only Making Project Live on Heroku====
-        #  'ENGINE': 'django.db.backends.sqlite3',
-        #  'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        'ENGINE':'django.db.backends.mysql',
-        'NAME':'db_sms',
-        'USER':'root',
-        'PASSWORD':'12345@Asus',
-        'HOST':'localhost',
-        'PORT':'3306'
-    }
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
 }
+
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+DB_ENGINE = os.getenv('DB_ENGINE', None)
+DB_USERNAME = os.getenv('DB_USER', None)
+DB_PASS = os.getenv('DB_PASSWORD', None)
+DB_HOST = os.getenv('DB_HOST', None)
+DB_PORT = os.getenv('DB_PORT', None)
+DB_NAME = os.getenv('DB_NAME', None)
+
+if DB_ENGINE and DB_NAME and DB_USERNAME:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.' + DB_ENGINE,
+            'NAME': DB_NAME,
+            'USER': DB_USERNAME,
+            'PASSWORD': DB_PASS,
+            'HOST': DB_HOST,
+            'PORT': DB_PORT,
+        },
+    }
+else:
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 
 # Password validation
