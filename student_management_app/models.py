@@ -262,7 +262,7 @@ class LeaveReportStaff(models.Model):
 
 class LeaveReportAccount(models.Model):
     id = models.AutoField(primary_key=True)
-    accountant_id = models.ForeignKey(Staffs, on_delete=models.CASCADE)
+    accountant_id = models.ForeignKey(Accountant, on_delete=models.CASCADE)
     leave_date = models.CharField(max_length=255)
     leave_message = models.TextField()
     leave_status = models.IntegerField(default=0)
@@ -431,7 +431,7 @@ def create_user_profile(sender,instance,created,**kwargs):
         if instance.user_type==2:
             Staffs.objects.create(admin=instance,address="")  
         if instance.user_type==3:
-            Students.objects.create(admin=instance,course_id=Courses.objects.get(id=1),session_year_id=SessionYearModel.object.get(id=1),address="",profile_pic="",gender="")
+            Students.objects.create(admin=instance,course_id=Courses.objects.first(),session_year_id=SessionYearModel.object.first(),address="",profile_pic="",gender="")
         if instance.user_type==4:
             Accountant.objects.create(admin=instance,address="")
           

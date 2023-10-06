@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from student_management_app.forms import StudentFeeForm
+from student_management_app.forms import FeeUpdateForm
 from student_management_app.models import *
 
 
@@ -166,16 +166,54 @@ def returnHtmlWidget(request):
 
 from django.shortcuts import render, redirect
 
+
+def list_student_fee(request):
+    students_with_fees = Students.objects.select_related('admin').prefetch_related('fee_set').all()
+    return render(request, 'accountant/list_students.html', {'students': students_with_fees})
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+from django.contrib import messages
+
 def update_student_fee(request, student_id):
-    student = Students.objects.get(pk=student_id)
+    student = get_object_or_404(Students, pk=student_id)
+    if request.method == "POST":
+        total_fee = request.POST.get('total_fee')
+        amount_paid = request.POST.get('amount_paid')
+        due_date = request.POST.get('due_date')
+        id = request.POST.get('student_id')
+        stud = Students.objects.get(id=id)
+        print(total_fee)
+        print(amount_paid)
+        print(due_date)
+        print(id)
+        try:
+            fee = Fee.objects.get(student=stud)
+            fee.total_fee = total_fee
+            fee.amount_paid = amount_paid
+            fee.due_date = due_date
+            fee.save()
+        except Fee.DoesNotExist:
+            fee = Fee.objects.create(student=stud,total_fee=total_fee,amount_paid=amount_paid,due_date=due_date)
+            fee.save()
+        messages.success(request,"Fee Updated successfully")
+        return HttpResponseRedirect(reverse("update_student_fee",kwargs={"student_id":stud.id}))
 
-    if request.method == 'POST':
-        form = StudentFeeForm(request.POST, instance=student)
+    return render(request, 'accountant/update_student_fee.html', {'student': student})
+
+
+
+def update_student_fee_save(request):
+    if request.method == "POST":
+        form =FeeUpdateForm(request.POST)
         if form.is_valid():
-            form.save()
-            # Redirect to the student's detail page or another appropriate page
-            return redirect('student_detail', student_id=student_id)
-    else:
-        form = StudentFeeForm(instance=student)
-
-    return render(request, 'accountant/update_fee.html', {'form': form})
+            fee_instance = form.save(commit=False)
+            if fee_instance.amount_paid == fee_instance.total_fee:
+                fee_instance.is_fee_paid = True
+            fee_instance.save()
+            messages.success(request, "Fee Updated Sucessfully")
+            return redirect('list_student_fee')
+        else:
+            messages.error(request,"form is not valid")
+            return HttpResponseRedirect(reverse("update_student_fee"))

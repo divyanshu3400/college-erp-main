@@ -11,7 +11,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from student_management_app.EmailBackEnd import EmailBackEnd
-from student_management_app.models import CustomUser, Courses, SessionYearModel,Accountant
+from student_management_app.models import *
 from student_management_system import settings
 
 
@@ -177,19 +177,27 @@ def do_signup_student(request):
     filename = fs.save(profile_pic.name, profile_pic)
     profile_pic_url = fs.url(filename)
 
-    #try:
-    user = CustomUser.objects.create_user(username=username, password=password, email=email, last_name=last_name,
-                                          first_name=first_name, user_type=3)
-    user.students.address = address
-    course_obj = Courses.objects.get(id=course_id)
-    user.students.course_id = course_obj
-    session_year = SessionYearModel.object.get(id=session_year_id)
-    user.students.session_year_id = session_year
-    user.students.gender = sex
-    user.students.profile_pic = profile_pic_url
-    user.save()
-    messages.success(request, "Successfully Added Student")
-    return HttpResponseRedirect(reverse("show_login"))
-    #except:
-     #   messages.error(request, "Failed to Add Student")
-      #  return HttpResponseRedirect(reverse("show_login"))
+    profile_pic=models.FileField()
+    address=models.TextField()
+    course_id=models.ForeignKey(Courses,on_delete=models.DO_NOTHING)
+    session_year_id=models.ForeignKey(SessionYearModel,on_delete=models.CASCADE)
+
+    try:
+        user = CustomUser.objects.create_user(
+            username=username, password=password, email=email, last_name=last_name,
+            first_name=first_name, user_type=3)
+        student = Students.objects.get(admin=user)
+        student.address = address
+        course = Courses.objects.get(id=course_id)
+        student.course_id = course
+        session = SessionYearModel.object.get(id=session_year_id)
+        student.session_year_id = session
+        student.gender = sex
+        student.profile_pic = profile_pic_url
+        student.save()
+        messages.success(request, "Successfully Added Student")
+        return HttpResponseRedirect(reverse("show_login"))
+    
+    except:
+       messages.error(request, "Failed to Add Student")
+       return HttpResponseRedirect(reverse("show_login"))

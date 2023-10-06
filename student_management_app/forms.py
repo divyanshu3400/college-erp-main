@@ -25,13 +25,12 @@ class AddStudentForm(forms.Form):
             course_list.append(small_course)
     except:
         course_list=[]
-    #course_list=[]
 
     session_list = []
     try:
         sessions = SessionYearModel.object.all()
-
         for ses in sessions:
+            print(ses)
             small_ses = (ses.id, str(ses.session_start_year)+"   TO  "+str(ses.session_end_year))
             session_list.append(small_ses)
     except:
@@ -116,8 +115,22 @@ class EditResultForm(forms.Form):
     
     
 
+from django import forms
 
-class StudentFeeForm(forms.ModelForm):
+class FeeUpdateForm(forms.ModelForm):
     class Meta:
         model = Fee
-        fields = ['total_fee', 'amount_paid','due_date']
+        fields = ['student', 'total_fee', 'amount_paid', 'due_date']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Add Bootstrap classes to form fields
+        self.fields['total_fee'].widget.attrs['class'] = 'form-control'
+        self.fields['amount_paid'].widget.attrs['class'] = 'form-control'
+
+        # Customize the due_date field widget to use DateInput
+        self.fields['due_date'].widget = forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+
+
+

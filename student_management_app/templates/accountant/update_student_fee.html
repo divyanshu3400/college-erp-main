@@ -1,0 +1,89 @@
+{% extends 'accountant/base_template.html' %}
+{% block page_title %}
+Update {{student.admin.first_name}} {{student.admin.last_name}}'s Fee
+{% endblock page_title %}
+{% block main_content %}
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card p-2">
+
+                    <div class="card-body table-responsive p-0">
+
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="number" value="{{student.id}}" name="student_id" class="form-control" readonly hidden>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="email">Email</label>
+                                    <input type="email" value="{{student.admin.email}}" class="form-control" id="email"
+                                        readonly>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="session">Session Year</label>
+                                    <input type="text"
+                                        value="{{ student.session_year_id.session_start_year }} TO {{ student.session_year_id.session_end_year }}"
+                                        class="form-control" readonly id="session">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="total_fee">Total Fee</label>
+                                    <input type="text" class="form-control" name="total_fee" id="total_fee">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="amount_paid">Amount Paid</label>
+                                    <input type="text" class="form-control" name="amount_paid" id="amount_paid">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="due_date">Due Date</label>
+                                    <input type="date" class="form-control" name="due_date" id="due_date">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="course">Course</label>
+                                    <input type="text" readonly value="{{ student.course_id.course_name }}"
+                                        class="form-control" id="course">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn form-control btn-primary">Update Fee</button>
+                            </div>
+                            <div class="form-group">
+                                {% if messages %}
+                                {% for message in messages %}
+                                {% if message.tags == 'error' %}
+                                <div class="alert alert-danger" style="margin-top:10px">{{ message }}</div>
+                                {% endif %}
+                                {% if message.tags == 'success' %}
+                                <div class="alert alert-success" style="margin-top:10px">{{ message }}</div>
+                                {% endif %}
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+
+                        </form>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+        </div>
+    </div>
+</section>
+<!-- /.content -->
+{% endblock main_content %}
+
+<script>
+    $(document).ready(function () {
+        $("#id_due_date").datepicker({
+            dateFormat: "yy-mm-dd",  // Define your desired date format
+            changeMonth: true,
+            changeYear: true,
+        });
+    });
+</script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>

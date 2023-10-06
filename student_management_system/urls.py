@@ -104,7 +104,9 @@ urlpatterns = [
     path('accountant_profile_save', AccountantView.accountant_profile_save, name="accountant_profile_save"),
     path('accountant_fcmtoken_save', AccountantView.accountant_fcmtoken_save, name="accountant_fcmtoken_save"),
     path('accountant_all_notification', AccountantView.accountant_all_notification, name="accountant_all_notification"),
-
+    path('list_student_fee', AccountantView.list_student_fee, name="list_student_fee"),
+    path('update_student_fee/<int:student_id>', AccountantView.update_student_fee, name="update_student_fee"),
+    path('update_student_fee_save', AccountantView.update_student_fee_save, name="update_student_fee_save"),
     path('student_home', StudentViews.student_home, name="student_home"),
     path('student_view_attendance', StudentViews.student_view_attendance, name="student_view_attendance"),
     path('student_view_attendance_post', StudentViews.student_view_attendance_post, name="student_view_attendance_post"),

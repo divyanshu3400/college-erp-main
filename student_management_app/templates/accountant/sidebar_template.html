@@ -46,8 +46,8 @@
             </a>
           </li> -->
            <li class="nav-item">
-            {% url 'accountant_update_attendance' as accountant_update_attendance %}
-            <a href="{{ accountant_update_attendance }}" class="nav-link {% if request.path == accountant_update_attendance %} active {% endif %}">
+            {% url 'list_student_fee' as list_student_fee %}
+            <a href="{{ list_student_fee }}" class="nav-link {% if request.path == list_student_fee %} active {% endif %}">
               <i class="nav-icon fas fa-th"></i>
               <p>
                 Update Student Fee
