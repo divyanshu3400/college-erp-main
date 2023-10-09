@@ -99,39 +99,18 @@ from django.db.models import Q
 def search_students(request):
     if request.method == 'POST':
         search_term = request.POST.get('search_term')
-
+        print("Search Term: "+search_term)
         students = Students.objects.filter(
             Q(admin__first_name__icontains=search_term) |
+            Q(address__icontains=search_term)  |
             Q(admin__last_name__icontains=search_term)
         )
-        student_data = []
-        for student in students:
-            fees = Fee.objects.filter(student=student)
-            total_amount = sum(fee.total_fee for fee in fees)
-            amount_paid = sum(fee.amount_paid for fee in fees)
-            if fees:
-                due_date = max(fee.last_due_date for fee in fees if fee.last_due_date is not None)
-            else:
-                due_date = None 
-            profile_pic_url = student.profile_pic.url if student.profile_pic else ''
-                
-            data = {
-                    'id':student.id,
-                    'admin.first_name': student.admin.first_name,
-                    'admin.last_name': student.admin.last_name,
-                    'admin.email': student.admin.email,
-                    'address': student.address,
-                    'gender': student.gender,
-                    'session_year': f'{datetime.strftime(student.session_year_id.session_start_year, "%b-%d, %Y")} To {datetime.strftime(student.session_year_id.session_end_year, "%b-%d, %Y")}',
-                    'course_name': student.course_id.course_name,
-                    'date_joined': student.admin.date_joined,
-                    'total_amount': total_amount,
-                    'amount_paid': amount_paid,
-                    'last_due_date': due_date,
-                    'profile_pic': profile_pic_url,
-                }
-            student_data.append(data)
-            return JsonResponse(student_data, safe=False)
+
+        if students:
+            return JsonResponse(formatStudentsData(students), safe=False)
+        else:
+            print('In else block')
+            return JsonResponse(False, safe=False)
     return JsonResponse([], safe=False)
 
 
@@ -148,42 +127,48 @@ def get_students(request):
             session_year = SessionYearModel.objects.get(id=session_year)
             students = Students.objects.filter(
                 course_id=subject, session_year_id=session_year)
-            
-            student_data = []
-
-            for student in students:
-                # Get related Fee objects for the student
-                fees = Fee.objects.filter(student=student)
-                total_amount = sum(fee.total_fee for fee in fees)
-                amount_paid = sum(fee.amount_paid for fee in fees)
-                if fees:
-                    due_date = max(fee.last_due_date for fee in fees if fee.last_due_date is not None)
-                else:
-                    due_date = None 
-                profile_pic_url = student.profile_pic.url if student.profile_pic else ''
-                
-                data = {
-                    'id':student.id,
-                    'admin.first_name': student.admin.first_name,
-                    'admin.last_name': student.admin.last_name,
-                    'admin.email': student.admin.email,
-                    'address': student.address,
-                    'gender': student.gender,
-                    'session_year': f'{datetime.strftime(student.session_year_id.session_start_year, "%b-%d, %Y")} To {datetime.strftime(student.session_year_id.session_end_year, "%b-%d, %Y")}',
-                    'course_name': student.course_id.course_name,
-                    'date_joined': student.admin.date_joined,
-                    'total_amount': total_amount,
-                    'amount_paid': amount_paid,
-                    'last_due_date': due_date,
-                    'profile_pic': profile_pic_url,
-                }
-                student_data.append(data)
-            
-            return JsonResponse(student_data, safe=False)
+            if students:
+                return JsonResponse(formatStudentsData(students), safe=False)
+            else:
+                return JsonResponse(False, safe=False)
         except (Courses.DoesNotExist, SessionYearModel.DoesNotExist):
             return JsonResponse([], safe=False)
     return JsonResponse([], safe=False)
 
+
+def formatStudentsData(students):
+    student_data = []
+    for student in students:
+        fees = Fee.objects.filter(student=student)
+        total_amount = sum(fee.total_fee for fee in fees)
+        amount_paid = sum(fee.amount_paid for fee in fees)
+        if fees:
+            due_date = max(fee.last_due_date for fee in fees if fee.last_due_date is not None)
+        else:
+            due_date = None 
+        
+        profile_pic_url = ''
+
+        if student.profile_pic:
+            profile_pic_url = student.profile_pic.url
+            # profile_pic_url = student.profile_pic.url if student.profile_pic else '' 
+        data = {
+                'id':student.id,
+                'admin.first_name': student.admin.first_name,
+                'admin.last_name': student.admin.last_name,
+                'admin.email': student.admin.email,
+                'address': student.address,
+                'gender': student.gender,
+                'session_year': f'{datetime.strftime(student.session_year_id.session_start_year, "%b-%d, %Y")} To {datetime.strftime(student.session_year_id.session_end_year, "%b-%d, %Y")}',
+                'course_name': student.course_id.course_name,
+                'date_joined': student.admin.date_joined,
+                'total_amount': total_amount,
+                'amount_paid': amount_paid,
+                'last_due_date': due_date,
+                'profile_pic': profile_pic_url,
+             }
+        student_data.append(data)
+    return student_data
 
 def accountant_apply_leave(request):
     account_obj = Accountant.objects.get(admin=request.user.id)

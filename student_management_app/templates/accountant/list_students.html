@@ -4,18 +4,39 @@ Manage Student
 {% endblock page_title %}
 {% block main_content %}
 <style>
-  /* Custom CSS for loader */
   .loader-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
-      display: none; /* Initially hidden */
-      justify-content: center;
-      align-items: center;
-      z-index: 9999; /* Ensure it's on top of other elements */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent overlay */
+    display: none;
+    /* Initially hidden */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+
+  .error-dialog {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: red;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    height: 50px;
+    display: none;
+  }
+
+  .close-button {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    cursor: pointer;
   }
 </style>
 <!-- Main content -->
@@ -25,29 +46,31 @@ Manage Student
 
     <div class="row">
       <div class=" col-md-3 mb-3">
-        <select id="course-dropdown" class="select2 select2-hidden-accessible"
-          style="width: 100%; height: 40px;" tabindex="-1" aria-hidden="true" name="state">
+        <select id="course-dropdown" class="select2 select2-hidden-accessible" style="width: 100%; height: 40px;"
+          tabindex="-1" aria-hidden="true" name="state">
           <option value="">Course</option>
         </select>
       </div>
       <div class=" col-md-3 mb-3">
-        <select id="session-year-dropdown" class="select2 select2-hidden-accessible"
-          style="width: 100%; height: 40px;" tabindex="-1" aria-hidden="true" name="state">
+        <select id="session-year-dropdown" class="select2 select2-hidden-accessible" style="width: 100%; height: 40px;"
+          tabindex="-1" aria-hidden="true" name="state">
           <option value="">Session Year</option>
         </select>
       </div>
       <div class=" col-md-3 mb-3">
-        <button id="fetch-students-button" type="button" class="btn btn-outline-dark">Fetch Students</button>        
+        <button id="fetch-students-button" type="button" class="btn btn-outline-dark">Fetch Students</button>
       </div>
     </div>
-        <!-- Loader -->
-        <div class="loader-overlay">
-          <div class="spinner-grow text-primary" role="status">
-              <span class="sr-only">Loading...</span>
-          </div>
+
+    <!-- Loader -->
+    <div class="loader-overlay">
+      <div class="spinner-grow text-primary" role="status">
+        <span class="sr-only">Loading...</span>
       </div>
-  
+    </div>
+
     <div class="row">
+
       <div class="col-12">
         <div class="card">
           <div class="card-header">
@@ -55,7 +78,8 @@ Manage Student
 
             <div class="card-tools">
               <div class="input-group input-group-sm" style="width: 150px;">
-                <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+                <input type="text" name="table_search" id="search-input_box" class="form-control float-right"
+                  placeholder="Search">
 
                 <div class="input-group-append">
                   <button type="submit" id="search-input" class="btn btn-default"><i class="fas fa-search"></i></button>
@@ -93,6 +117,13 @@ Manage Student
         <!-- /.card -->
       </div>
     </div>
+
+    <!-- Error message dialog -->
+    <div class="error-dialog" id="error-dialog">
+      <span id="error-message">This is a custom error message.</span>
+      <span class="close-button" onclick="closeErrorDialog()">&#10006;</span>
+    </div>
+
   </div>
 </section>
 <!-- /.content -->
@@ -102,141 +133,160 @@ Manage Student
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 <script>
-    $(document).ready(function () {
-      
+  $(document).ready(function () {
+
     $('#session-year-dropdown').select2({
       placeholder: 'Select session year',
       allowClear: true,
       minimumInputLength: 1
     });
-  
+
     $('#course-dropdown').select2({
       placeholder: 'Select course',
       allowClear: true,
       minimumInputLength: 1
     });
-  
-        // Fetch session years and populate the dropdown
-        $.get('/get_session_years/', function (data) {
-          var sessionYears = data;
-          console.log(data)
-          var dropdown = $('#session-year-dropdown');
-          $.each(sessionYears, function (index, yearData) {
-            console.log(yearData.text)
-              dropdown.append($('<option>').text(yearData.text).val(yearData.id));
-          });
-      });
 
-        // Fetch courses and populate the dropdown
-        $.get('/get_course/', function (data) {
-          var course = data;
-          console.log(data)
-          var dropdown = $('#course-dropdown');
-          $.each(course, function (index, courseData) {
-            console.log(courseData.text)
-              dropdown.append($('<option>').text(courseData.text).val(courseData.id));
-          });
-      });      
+    // Fetch session years and populate the dropdown
+    $.get('/get_session_years/', function (data) {
+      var sessionYears = data;
+      console.log(data)
+      var dropdown = $('#session-year-dropdown');
+      $.each(sessionYears, function (index, yearData) {
+        console.log(yearData.text)
+        dropdown.append($('<option>').text(yearData.text).val(yearData.id));
+      });
     });
+
+    // Fetch courses and populate the dropdown
+    $.get('/get_course/', function (data) {
+      var course = data;
+      console.log(data)
+      var dropdown = $('#course-dropdown');
+      $.each(course, function (index, courseData) {
+        console.log(courseData.text)
+        dropdown.append($('<option>').text(courseData.text).val(courseData.id));
+      });
+    });
+  });
 
 </script>
 
 <script>
   $(document).ready(function () {
     const loaderOverlay = $(".loader-overlay");
+    function fetchStudentsByFilters(sessionYear, course) {
+      $.ajax({
+        url: '/filter_students/',
+        type: 'POST',
+        data: {
+          session_year: sessionYear,
+          course: course
+        },
+        dataType: 'json',
+        success: function (student_data) {
+          console.log(student_data)
+          if (student_data == false) {
+            $(".loader-overlay").css("display", "none");
+            $("#student-table-body").css("display", "none");
 
-      function fetchStudentsByFilters(sessionYear, course) {
-          $.ajax({
-              url: '/filter_students/',  // URL to your Django view for filtering students
-              type: 'POST',
-              data: {
-                  session_year: sessionYear,
-                  course: course
-              },
-              dataType: 'json',
-              success: function (student_data) {
-                loaderOverlay.css("display", "none");
-                var studentTableBody = $('#student-table-body');
-                studentTableBody.empty();
-                var updateStudentFeeBaseURL = '/update_student_fee/';
-                // Populate the table with the retrieved student datax
-                $.each(student_data, function (index, student) {
-                    var row = $('<tr>');
-                    var updateStudentFeeURL = updateStudentFeeBaseURL + student.id + '/';
-                    row.append($('<td>').html('<img class="img-circle" src="' + student['profile_pic'] + '" style="width:50px; height: 50px;" />'));
-                    row.append($('<td>').html("<a href='" + updateStudentFeeURL + "' class='text-primary student-link'>" + student['admin.first_name'] + "</a>"));
-                    row.append($('<td>').text(student['admin.last_name']));
-                    row.append($('<td>').text(student['admin.email']));
-                    row.append($('<td>').text(student['address']));
-                    row.append($('<td>').text(student['gender']));
-                    row.append($('<td>').text(student['session_year']));
-                    row.append($('<td>').text(student['course_name']));
-                    row.append($('<td>').text(student['date_joined']));
-                    row.append($('<td>').text(student['total_amount']));
-                    row.append($('<td>').text(student['amount_paid']));
-                    row.append($('<td>').text(student['last_due_date']));
-                    studentTableBody.append(row);
-                });
-            },
-              error: function (xhr, status, error) {
-                loaderOverlay.css("display", "none");
-                  console.error(error);
-              }
-          });
-      }
+            showErrorDialog('No Students data found.');
+          }
+          else {
+            $("#student-table-body").css("display", "none");
+            setStudentData(student_data)
+          }
 
-      // Attach an event handler to the "Fetch Students" button
-      $('#fetch-students-button').click(function () {
-          var selectedSessionYear = $('#session-year-dropdown').val();
-          var selectedCourse = $('#course-dropdown').val();
-          loaderOverlay.css("display", "flex");
-          fetchStudentsByFilters(selectedSessionYear, selectedCourse);
+        },
+        error: function (xhr, status, error) {
+          loaderOverlay.css("display", "none");
+          console.error(error);
+        }
       });
+    }
 
-      const searchForm = $("#search-form");
+    $('#fetch-students-button').click(function () {
+      var selectedSessionYear = $('#session-year-dropdown').val();
+      var selectedCourse = $('#course-dropdown').val();
+      loaderOverlay.css("display", "flex");
+      fetchStudentsByFilters(selectedSessionYear, selectedCourse);
+    });
 
-      searchForm.submit(function (event) {
-          event.preventDefault();
-
-          const searchInput = $("#search-input");
-          const searchTerm = searchInput.val();
-          $.ajax({
-              url: '{% url "search_students" %}',
-              type: 'POST',
-              data: {
-                  search_term: searchTerm
-              },
-              dataType: 'json',
-              success: function (student_data) {
-                loaderOverlay.css("display", "none");
-                var studentTableBody = $('#student-table-body');
-                studentTableBody.empty();
-                var updateStudentFeeBaseURL = '/update_student_fee/';
-                $.each(student_data, function (index, student) {
-                    var row = $('<tr>');
-                    var updateStudentFeeURL = updateStudentFeeBaseURL + student.id + '/';
-                    row.append($('<td>').html('<img class="img-circle" src="' + student['profile_pic'] + '" style="width:50px; height: 50px;" />'));
-                    row.append($('<td>').html("<a href='" + updateStudentFeeURL + "' class='text-primary student-link'>" + student['admin.first_name'] + "</a>"));
-                    row.append($('<td>').text(student['admin.last_name']));
-                    row.append($('<td>').text(student['admin.email']));
-                    row.append($('<td>').text(student['address']));
-                    row.append($('<td>').text(student['gender']));
-                    row.append($('<td>').text(student['session_year']));
-                    row.append($('<td>').text(student['course_name']));
-                    row.append($('<td>').text(student['date_joined']));
-                    row.append($('<td>').text(student['total_amount']));
-                    row.append($('<td>').text(student['amount_paid']));
-                    row.append($('<td>').text(student['last_due_date']));
-                    studentTableBody.append(row);
-                });
-            },
-              error: function (xhr, status, error) {
-                  console.error(error);
-              }
-          });
-      });
-
+    $('#search-input').click(function () {
+      $(".loader-overlay").css("display", "flex");
+      searchData($("#search-input_box").val())
+    });
   });
+
+  $("#search-input_box").keypress(function (event) {
+    if (event.which === 13) { // 13 is the key code for Enter
+      event.preventDefault();
+      searchData($("#search-input_box").val())
+      $("#search-input_box").val("");
+    }
+  });
+
+  function searchData(searchTerm) {
+    $.ajax({
+      url: '{% url "search_students" %}',
+      type: 'POST',
+      data: { search_term: searchTerm },
+      dataType: 'json',
+      success: function (student_data) {
+        console.log(student_data)
+        if (student_data == false) {
+          $(".loader-overlay").css("display", "none");
+          showErrorDialog('No Students data found.');
+        }
+        else {
+          $("#search-input_box").val("")
+          setStudentData(student_data)
+        }
+      },
+      error: function (xhr, status, error) {
+        $(".loader-overlay").css("display", "none");
+        showErrorDialog(error);
+      }
+    });
+  }
+
+  function setStudentData(student_data) {
+    $(".loader-overlay").css("display", "none");
+    console.log(student_data)
+    var studentTableBody = $('#student-table-body');
+    studentTableBody.empty();
+    var updateStudentFeeBaseURL = '/update_student_fee/';
+    $.each(student_data, function (index, student) {
+      var row = $('<tr>');
+      var updateStudentFeeURL = updateStudentFeeBaseURL + student.id + '/';
+      row.append($('<td>').html('<img class="img-circle" src="' + student['profile_pic'] + '" style="width:50px; height: 50px;" />'));
+      row.append($('<td>').html("<a href='" + updateStudentFeeURL + "' class='text-primary student-link'>" + student['admin.first_name'] + "</a>"));
+      row.append($('<td>').text(student['admin.last_name']));
+      row.append($('<td>').text(student['admin.email']));
+      row.append($('<td>').text(student['address']));
+      row.append($('<td>').text(student['gender']));
+      row.append($('<td>').text(student['session_year']));
+      row.append($('<td>').text(student['course_name']));
+      row.append($('<td>').text(student['date_joined']));
+      row.append($('<td>').text(student['total_amount']));
+      row.append($('<td>').text(student['amount_paid']));
+      row.append($('<td>').text(student['last_due_date']));
+      studentTableBody.append(row);
+    });
+  }
+
+  function showErrorDialog(message) {
+    const errorDialog = document.getElementById('error-dialog');
+    const errorMessage = document.getElementById('error-message');
+    errorMessage.textContent = message;
+    errorDialog.style.display = 'block';
+  }
+
+  // Function to close the error dialog
+  function closeErrorDialog() {
+    const errorDialog = document.getElementById('error-dialog');
+    errorDialog.style.display = 'none';
+  }
 
 </script>
 
