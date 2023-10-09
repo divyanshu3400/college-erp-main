@@ -72,16 +72,68 @@ def accountant_home(request):
                    "attendance_list": attendance_list, "student_list": student_list, "present_list": student_list_attendance_present, "absent_list": student_list_attendance_absent, 'students_with_dues_count': students_with_dues_count})
 
 
+from datetime import datetime
 
 def get_session_years(request):
     session_years = SessionYearModel.objects.all().values_list('id', 'session_start_year', 'session_end_year')
-    session_years_list = [{'id': id, 'text': f'{session_start_year}   To   {session_end_year}'} for id, session_start_year, session_end_year in session_years]
+    session_years_list = [
+        {
+            'id': id,
+            'text': f'{datetime.strftime(session_start_year, "%b-%d, %Y")} To {datetime.strftime(session_end_year, "%b-%d, %Y")}'
+        }
+        for id, session_start_year, session_end_year in session_years
+    ]
     return JsonResponse(session_years_list, safe=False)
+
 
 def get_course(request):
     courses = Courses.objects.all().values_list('id', 'course_name')
     course_list = [{'id': id, 'text': f'{course_name}'} for id, course_name  in courses]
     return JsonResponse(course_list, safe=False)
+
+
+from django.http import JsonResponse
+from django.db.models import Q
+
+@csrf_exempt
+def search_students(request):
+    if request.method == 'POST':
+        search_term = request.POST.get('search_term')
+
+        students = Students.objects.filter(
+            Q(admin__first_name__icontains=search_term) |
+            Q(admin__last_name__icontains=search_term)
+        )
+        student_data = []
+        for student in students:
+            fees = Fee.objects.filter(student=student)
+            total_amount = sum(fee.total_fee for fee in fees)
+            amount_paid = sum(fee.amount_paid for fee in fees)
+            if fees:
+                due_date = max(fee.last_due_date for fee in fees if fee.last_due_date is not None)
+            else:
+                due_date = None 
+            profile_pic_url = student.profile_pic.url if student.profile_pic else ''
+                
+            data = {
+                    'id':student.id,
+                    'admin.first_name': student.admin.first_name,
+                    'admin.last_name': student.admin.last_name,
+                    'admin.email': student.admin.email,
+                    'address': student.address,
+                    'gender': student.gender,
+                    'session_year': f'{datetime.strftime(student.session_year_id.session_start_year, "%b-%d, %Y")} To {datetime.strftime(student.session_year_id.session_end_year, "%b-%d, %Y")}',
+                    'course_name': student.course_id.course_name,
+                    'date_joined': student.admin.date_joined,
+                    'total_amount': total_amount,
+                    'amount_paid': amount_paid,
+                    'last_due_date': due_date,
+                    'profile_pic': profile_pic_url,
+                }
+            student_data.append(data)
+            return JsonResponse(student_data, safe=False)
+    return JsonResponse([], safe=False)
+
 
 from django.http import JsonResponse
 from .models import Students, SessionYearModel, Courses
@@ -117,7 +169,7 @@ def get_students(request):
                     'admin.email': student.admin.email,
                     'address': student.address,
                     'gender': student.gender,
-                    'session_year': str(student.session_year_id),
+                    'session_year': f'{datetime.strftime(student.session_year_id.session_start_year, "%b-%d, %Y")} To {datetime.strftime(student.session_year_id.session_end_year, "%b-%d, %Y")}',
                     'course_name': student.course_id.course_name,
                     'date_joined': student.admin.date_joined,
                     'total_amount': total_amount,

@@ -36,6 +36,7 @@ urlpatterns = [
     path('manage_course', HodViews.manage_course,name="manage_course"),
     path('manage_subject', HodViews.manage_subject,name="manage_subject"),
     path('edit_staff/<str:staff_id>', HodViews.edit_staff,name="edit_staff"),
+    path('delete_staff/<str:staff_id>', HodViews.delete_staff,name="delete_staff"),
     path('edit_staff_save', HodViews.edit_staff_save,name="edit_staff_save"),
     path('edit_student/<str:student_id>', HodViews.edit_student,name="edit_student"),
     path('edit_student_save', HodViews.edit_student_save,name="edit_student_save"),
@@ -126,6 +127,7 @@ urlpatterns = [
     path('get_session_years/', AccountantView.get_session_years, name='get_session_years'),
     path('get_course/', AccountantView.get_course, name='get_course'),
     path('filter_students/', AccountantView.get_students, name='filter_students'),
+    path('search_students/', AccountantView.search_students, name='search_students'),
 
 ]
 if settings.DEBUG:

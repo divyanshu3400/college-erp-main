@@ -10,6 +10,9 @@ class ChoiceNoValidation(ChoiceField):
 class DateInput(forms.DateInput):
     input_type = "date"
 
+
+from datetime import datetime
+
 class AddStudentForm(forms.Form):
     email=forms.EmailField(label="Email",max_length=50,widget=forms.EmailInput(attrs={"class":"form-control","autocomplete":"off"}))
     password=forms.CharField(label="Password",max_length=50,widget=forms.PasswordInput(attrs={"class":"form-control"}))
@@ -30,7 +33,7 @@ class AddStudentForm(forms.Form):
     try:
         sessions = SessionYearModel.objects.all()
         for ses in sessions:
-            small_ses = (ses.id, str(ses.session_start_year)+"   TO  "+str(ses.session_end_year))
+            small_ses = (ses.id, f'{datetime.strftime(ses.session_start_year, "%b-%d, %Y")} To {datetime.strftime(ses.session_end_year, "%b-%d, %Y")}')
             session_list.append(small_ses)
     except:
         session_list=[]
@@ -68,7 +71,8 @@ class EditStudentForm(forms.Form):
         sessions = SessionYearModel.objects.all()
 
         for ses in sessions:
-            small_ses = (ses.id, str(ses.session_start_year)+"   TO  "+str(ses.session_end_year))
+            small_ses = (ses.id, f'{datetime.strftime(ses.session_start_year, "%b-%d, %Y")} To {datetime.strftime(ses.session_end_year, "%b-%d, %Y")}')
+            print(f'{datetime.strftime(ses.session_start_year, "%b-%d, %Y")} To {datetime.strftime(ses.session_end_year, "%b-%d, %Y")}')
             session_list.append(small_ses)
     except Exception as e:
         print(e)

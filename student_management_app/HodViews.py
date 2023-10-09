@@ -195,6 +195,13 @@ def edit_staff(request,staff_id):
     staff=Staffs.objects.get(admin=staff_id)
     return render(request,"hod_template/edit_staff_template.html",{"staff":staff,"id":staff_id})
 
+def delete_staff(request,staff_id):
+    staff=Staffs.objects.get(admin=staff_id)
+    staff.delete()
+    messages.error(request, "Deleted Successfully")
+    return render(request,"hod_template/manage_staff_template.html")
+
+
 def edit_staff_save(request):
     if request.method!="POST":
         return HttpResponse("<h2>Method Not Allowed</h2>")
