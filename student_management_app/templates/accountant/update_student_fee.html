@@ -15,7 +15,8 @@ Update {{student.admin.first_name}} {{student.admin.last_name}}'s Fee
 
                         <form method="POST">
                             {% csrf_token %}
-                            <input type="number" value="{{student.id}}" name="student_id" class="form-control" readonly hidden>
+                            <input type="number" value="{{student.id}}" name="student_id" class="form-control" readonly
+                                hidden>
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="email">Email</label>
@@ -32,11 +33,22 @@ Update {{student.admin.first_name}} {{student.admin.last_name}}'s Fee
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="total_fee">Total Fee</label>
-                                    <input type="text" class="form-control" name="total_fee" id="total_fee">
+                                    <input type="text" value="{% if stud_fee %}{{stud_fee.total_fee}}{% endif %}"
+                                     {% if stud_fee.total_fee %} readonly {% endif %} class="form-control" 
+                                     name="total_fee" id="total_fee">
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label for="amount_paid">Amount Paid</label>
-                                    <input type="text" class="form-control" name="amount_paid" id="amount_paid">
+                                    <input type="text" value="{% if stud_fee %}{{stud_fee.amount_paid}}{% endif %}"
+                                        class="form-control" name="amount_paid" readonly id="amount_paid">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="due_date">Due Amount</label>
+                                    <input type="number" value="{% if stud_fee %}{{stud_fee.due_amount}}{% endif %}" class="form-control" readonly name="due_date" id="due_date">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="pay_amount">Pay Amount</label>
+                                    <input type="number" class="form-control" name="pay_amount" id="pay_amount">
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label for="due_date">Due Date</label>
@@ -47,7 +59,15 @@ Update {{student.admin.first_name}} {{student.admin.last_name}}'s Fee
                                     <input type="text" readonly value="{{ student.course_id.course_name }}"
                                         class="form-control" id="course">
                                 </div>
+
                             </div>
+                            {% if stud_fee.last_due_date %}
+                            <div class="form-group">
+                                <label for="last_due_date">Last Due Date & Due Amount</label>
+                                <input type="text" value="{% if stud_fee %}{{stud_fee.last_due_date}} | {{stud_fee.due_amount}}{% endif %}" class="form-control" readonly name="last_due_date" id="last_due_date">
+                            </div>
+                            {% endif %}
+                            
                             <div class="form-group">
                                 <button type="submit" class="btn form-control btn-primary">Update Fee</button>
                             </div>

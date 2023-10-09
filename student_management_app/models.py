@@ -8,7 +8,7 @@ class SessionYearModel(models.Model):
     id=models.AutoField(primary_key=True)
     session_start_year=models.DateField()
     session_end_year=models.DateField()
-    object=models.Manager()
+    objects=models.Manager()
     
     def __str__(self):
         return f'{self.session_start_year} + {self.session_end_year}'
@@ -122,7 +122,7 @@ class Students(models.Model):
     id=models.AutoField(primary_key=True)
     admin=models.OneToOneField(CustomUser,on_delete=models.CASCADE)
     gender=models.CharField(max_length=255)
-    profile_pic=models.FileField()
+    profile_pic=models.FileField(upload_to='student_profile_pic/')
     address=models.TextField()
     course_id=models.ForeignKey(Courses,on_delete=models.DO_NOTHING)
     session_year_id=models.ForeignKey(SessionYearModel,on_delete=models.CASCADE)
@@ -195,6 +195,7 @@ class AttendanceReport(models.Model):
         verbose_name = 'AttendanceReport'
         verbose_name_plural = 'AttendanceReports'
 
+from decimal import Decimal
 class Fee(models.Model):
     id = models.AutoField(primary_key=True)
     student = models.ForeignKey(Students, on_delete=models.CASCADE)
@@ -202,16 +203,26 @@ class Fee(models.Model):
     receipt = models.FileField(upload_to='fee_receipts/')
     updated_at = models.DateTimeField(auto_now_add=True)
     objects = models.Manager()
-    total_fee = models.DecimalField(max_digits=10, decimal_places=2)
     is_fee_paid = models.BooleanField(default=False)
+    due_amount = models.DecimalField(max_digits=10,decimal_places=2,default=0)
+    pay_amount = models.DecimalField(max_digits=10,decimal_places=2,default=0)
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)    
+    last_due_date = models.DateField(null=True, blank=True)
     due_date = models.DateField(null=True, blank=True)
-    
+
     def save(self, *args, **kwargs):
+        # Convert string representations to Decimal
+        self.total_fee = Decimal(self.total_fee)
+        self.amount_paid = Decimal(self.amount_paid)
+        self.pay_amount = Decimal(self.pay_amount)
+
         if self.amount_paid == self.total_fee:
             self.is_fee_paid = True
+        self.amount_paid += self.pay_amount 
+        self.due_amount = self.total_fee - self.amount_paid
+        self.pay_amount = 0
         super().save(*args, **kwargs)
-
 
     def __str__(self):
         return f'{self.student.admin.first_name} : {self.amount_paid}'

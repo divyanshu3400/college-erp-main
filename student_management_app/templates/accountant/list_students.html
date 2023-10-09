@@ -6,8 +6,25 @@ Manage Student
 <!-- Main content -->
 <section class="content">
   <div class="container-fluid">
+    <!-- templates/your_template.html -->
 
-
+    <div class="row">
+      <div class=" col-md-3 mb-3">
+        <select id="course-dropdown" class="select2 select2-hidden-accessible"
+          style="width: 100%; height: 40px;" tabindex="-1" aria-hidden="true" name="state">
+          <option value="">Course</option>
+        </select>
+      </div>
+      <div class=" col-md-3 mb-3">
+        <select id="session-year-dropdown" class="select2 select2-hidden-accessible"
+          style="width: 100%; height: 40px;" tabindex="-1" aria-hidden="true" name="state">
+          <option value="">Session Year</option>
+        </select>
+      </div>
+      <div class=" col-md-3 mb-3">
+        <button id="fetch-students-button" type="button" class="btn btn-dark">Fetch Students</button>        
+      </div>
+    </div>
     <div class="row">
       <div class="col-12">
         <div class="card">
@@ -41,31 +58,13 @@ Manage Student
                   <th>Total Fee</th>
                   <th>Amount Paid</th>
                   <th>Due Date</th>
-                  <th>Action</th>
+                  <!-- <th>Action</th> -->
                 </tr>
               </thead>
-              <tbody>
-                {% for student in students %}
-                <tr>
-                  <td><img class="img-circle" src="{{ student.profile_pic }}" style="width:50px; height: 50px;" /></td>
-                  <td>{{ student.admin.first_name }}</td>
-                  <td>{{ student.admin.last_name }}</td>
-                  <td>{{ student.admin.email }}</td>
-                  <td>{{ student.address }}</td>
-                  <td>{{ student.gender }}</td>
-                  <td>{{ student.session_year_id.session_start_year }} TO {{ student.session_year_id.session_end_year }}
-                  </td>
-                  <td>{{ student.course_id.course_name }}</td>
-                  <td>{{ student.admin.date_joined }}</td>
-                  <td>{{ student.fee_set.total_fee }}</td>
-                  <td>{{ student.fee_set.amount_paid }}</td>
-                  <td>{{ student.fee_set.due_date }}</td>
-                  <td><a href="{% url 'update_student_fee' student_id=student.id %}" class="btn btn-success">Update
-                      Fee</a></td>
-                </tr>
-                {% endfor %}
+              <tbody id="student-table-body">
               </tbody>
             </table>
+
           </div>
           <!-- /.card-body -->
         </div>
@@ -76,3 +75,105 @@ Manage Student
 </section>
 <!-- /.content -->
 {% endblock main_content %}
+{% block custom_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+      
+    $('#session-year-dropdown').select2({
+      placeholder: 'Select session year',
+      allowClear: true,
+      minimumInputLength: 1
+    });
+  
+    $('#course-dropdown').select2({
+      placeholder: 'Select course',
+      allowClear: true,
+      minimumInputLength: 1
+    });
+  
+        // Fetch session years and populate the dropdown
+        $.get('/get_session_years/', function (data) {
+          var sessionYears = data;
+          console.log(data)
+          var dropdown = $('#session-year-dropdown');
+          $.each(sessionYears, function (index, yearData) {
+            console.log(yearData.text)
+              dropdown.append($('<option>').text(yearData.text).val(yearData.id));
+          });
+      });
+
+        // Fetch courses and populate the dropdown
+        $.get('/get_course/', function (data) {
+          var course = data;
+          console.log(data)
+          var dropdown = $('#course-dropdown');
+          $.each(course, function (index, courseData) {
+            console.log(courseData.text)
+              dropdown.append($('<option>').text(courseData.text).val(courseData.id));
+          });
+      });      
+    });
+
+</script>
+
+<script>
+  $(document).ready(function () {
+      function fetchStudentsByFilters(sessionYear, course) {
+          $.ajax({
+              url: '/filter_students/',  // URL to your Django view for filtering students
+              type: 'POST',
+              data: {
+                  session_year: sessionYear,
+                  course: course
+              },
+              dataType: 'json',
+              success: function (student_data) {
+                var studentTableBody = $('#student-table-body');
+                studentTableBody.empty();
+                console.log(student_data)
+                // Populate the table with the retrieved student data
+                $.each(student_data, function (index, student) {
+                    var row = $('<tr>');
+                    console.log(student['profile_pic'])
+                    row.append($('<td>').html('<img class="img-circle" src="' + student['profile_pic'] + '" style="width:50px; height: 50px;" />'));
+                    row.append($('<td>').html('<a href="#" class="text-primary student-link" data-student-id="' + student.id + '">' + student['admin.first_name'] + '</a>'));
+                    row.append($('<td>').text(student['admin.last_name']));
+                    row.append($('<td>').text(student['admin.email']));
+                    row.append($('<td>').text(student['address']));
+                    row.append($('<td>').text(student['gender']));
+                    row.append($('<td>').text(student['session_year']));
+                    row.append($('<td>').text(student['course_name']));
+                    row.append($('<td>').text(student['date_joined']));
+                    row.append($('<td>').text(student['total_amount']));
+                    row.append($('<td>').text(student['amount_paid']));
+                    row.append($('<td>').text(student['last_due_date']));
+                    studentTableBody.append(row);
+                });
+            },
+              error: function (xhr, status, error) {
+                  console.error(error);
+              }
+          });
+      }
+
+      // Attach an event handler to the "Fetch Students" button
+      $('#fetch-students-button').click(function () {
+          var selectedSessionYear = $('#session-year-dropdown').val();
+          var selectedCourse = $('#course-dropdown').val();
+          fetchStudentsByFilters(selectedSessionYear, selectedCourse);
+      });
+  });
+      // Add this code in your JavaScript:
+    $('.student-link').click(function (e) {
+      e.preventDefault();
+      var studentId = $(this).data('student-id');
+      var url = '/update_student_fee/' + studentId + '/';
+      window.location.href = url;
+    });
+
+</script>
+
+{% endblock custom_js %}

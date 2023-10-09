@@ -122,5 +122,11 @@ urlpatterns = [
     path('student_view_result',StudentViews.student_view_result,name="student_view_result"),
     path('join_class_room/<int:subject_id>/<int:session_year_id>',StudentViews.join_class_room,name="join_class_room"),
     path('node_modules/canvas-designer/widget.html',StaffViews.returnHtmlWidget,name="returnHtmlWidget"),
-    path('testurl/',views.Testurl)
-]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
+    path('testurl/',views.Testurl),
+    path('get_session_years/', AccountantView.get_session_years, name='get_session_years'),
+    path('get_course/', AccountantView.get_course, name='get_course'),
+    path('filter_students/', AccountantView.get_students, name='filter_students'),
+
+]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
