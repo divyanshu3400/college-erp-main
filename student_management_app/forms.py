@@ -28,14 +28,12 @@ class AddStudentForm(forms.Form):
 
     session_list = []
     try:
-        print("try")
-        sessions = SessionYearModel.object.all()
+        sessions = SessionYearModel.objects.all()
         for ses in sessions:
             small_ses = (ses.id, str(ses.session_start_year)+"   TO  "+str(ses.session_end_year))
             session_list.append(small_ses)
     except:
         session_list=[]
-        print("exception")
 
     gender_choice=(
         ("Male","Male"),
@@ -61,19 +59,19 @@ class EditStudentForm(forms.Form):
         for course in courses:
             small_course=(course.id,course.course_name)
             course_list.append(small_course)
-    except:
+    except Exception as e:
+        print(e)
         course_list=[]
 
     session_list = []
     try:
-        sessions = SessionYearModel.object.all()
+        sessions = SessionYearModel.objects.all()
 
         for ses in sessions:
             small_ses = (ses.id, str(ses.session_start_year)+"   TO  "+str(ses.session_end_year))
-            print(small_ses)
             session_list.append(small_ses)
-    except:
-        pass
+    except Exception as e:
+        print(e)
 
     gender_choice=(
         ("Male","Male"),

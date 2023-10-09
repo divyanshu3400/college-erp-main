@@ -133,13 +133,14 @@ Manage Student
               success: function (student_data) {
                 var studentTableBody = $('#student-table-body');
                 studentTableBody.empty();
-                console.log(student_data)
-                // Populate the table with the retrieved student data
+                var updateStudentFeeBaseURL = '/update_student_fee/';
+                // Populate the table with the retrieved student datax
                 $.each(student_data, function (index, student) {
                     var row = $('<tr>');
                     console.log(student['profile_pic'])
+                    var updateStudentFeeURL = updateStudentFeeBaseURL + student.id + '/';
                     row.append($('<td>').html('<img class="img-circle" src="' + student['profile_pic'] + '" style="width:50px; height: 50px;" />'));
-                    row.append($('<td>').html('<a href="#" class="text-primary student-link" data-student-id="' + student.id + '">' + student['admin.first_name'] + '</a>'));
+                    row.append($('<td>').html("<a href='" + updateStudentFeeURL + "' class='text-primary student-link'>" + student['admin.first_name'] + "</a>"));
                     row.append($('<td>').text(student['admin.last_name']));
                     row.append($('<td>').text(student['admin.email']));
                     row.append($('<td>').text(student['address']));
@@ -170,7 +171,7 @@ Manage Student
     $('.student-link').click(function (e) {
       e.preventDefault();
       var studentId = $(this).data('student-id');
-      var url = '/update_student_fee/' + studentId + '/';
+      var url = 'update_student_fee/' + studentId + '/';
       window.location.href = url;
     });
 

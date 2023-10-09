@@ -75,7 +75,7 @@ def accountant_home(request):
 
 def get_session_years(request):
     session_years = SessionYearModel.objects.all().values_list('id', 'session_start_year', 'session_end_year')
-    session_years_list = [{'id': id, 'text': f'{session_start_year} - {session_end_year}'} for id, session_start_year, session_end_year in session_years]
+    session_years_list = [{'id': id, 'text': f'{session_start_year}   To   {session_end_year}'} for id, session_start_year, session_end_year in session_years]
     return JsonResponse(session_years_list, safe=False)
 
 def get_course(request):
@@ -102,17 +102,17 @@ def get_students(request):
             for student in students:
                 # Get related Fee objects for the student
                 fees = Fee.objects.filter(student=student)
-                
-                # Calculate total_amount, amount_paid, and due_date based on fees
                 total_amount = sum(fee.total_fee for fee in fees)
                 amount_paid = sum(fee.amount_paid for fee in fees)
-                due_date = max(fee.last_due_date for fee in fees if fee.last_due_date is not None)
-                
-                # Construct the URL for the profile picture
+                if fees:
+                    due_date = max(fee.last_due_date for fee in fees if fee.last_due_date is not None)
+                else:
+                    due_date = None 
                 profile_pic_url = student.profile_pic.url if student.profile_pic else ''
                 absolute_profile_pic_url = request.build_absolute_uri(profile_pic_url)
                 
                 data = {
+                    'id':student.id,
                     'admin.first_name': student.admin.first_name,
                     'admin.last_name': student.admin.last_name,
                     'admin.email': student.admin.email,
@@ -161,7 +161,6 @@ def accountant_apply_leave_save(request):
 
 def accountant_feedback(request):
     staff_id = Accountant.objects.get(admin=request.user.id)
-    print("Accountant Id: ", staff_id)
     feedback_data = FeedBackAccountant.objects.filter(accountant_id=staff_id)
     return render(request, "accountant/accountant_feedback.html", {"feedback_data": feedback_data})
 

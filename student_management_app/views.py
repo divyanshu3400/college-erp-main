@@ -190,7 +190,7 @@ def do_signup_student(request):
         student.address = address
         course = Courses.objects.get(id=course_id)
         student.course_id = course
-        session = SessionYearModel.object.get(id=session_year_id)
+        session = SessionYearModel.objects.get(id=session_year_id)
         student.session_year_id = session
         student.gender = sex
         student.profile_pic = profile_pic_url

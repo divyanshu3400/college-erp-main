@@ -135,15 +135,15 @@ def add_student_save(request):
                 user.students.address=address
                 course_obj=Courses.objects.get(id=course_id)
                 user.students.course_id=course_obj
-                session_year=SessionYearModel.object.get(id=session_year_id)
+                session_year=SessionYearModel.objects.get(id=session_year_id)
                 user.students.session_year_id=session_year
                 user.students.gender=sex
                 user.students.profile_pic=profile_pic_url
                 user.save()
                 messages.success(request,"Successfully Added Student")
                 return HttpResponseRedirect(reverse("add_student"))
-            except:
-                messages.error(request,"Failed to Add Student")
+            except Exception as e:
+                messages.error(request,"Failed to Add Student: "+str(e))
                 return HttpResponseRedirect(reverse("add_student"))
         else:
             form=AddStudentForm(request.POST)
@@ -275,7 +275,7 @@ def edit_student_save(request):
 
                 student=Students.objects.get(admin=student_id)
                 student.address=address
-                session_year = SessionYearModel.object.get(id=session_year_id)
+                session_year = SessionYearModel.objects.get(id=session_year_id)
                 student.session_year_id = session_year
                 student.gender=sex
                 course=Courses.objects.get(id=course_id)
@@ -549,10 +549,6 @@ def send_staff_notification(request):
     message=request.POST.get("message")
     staff=Staffs.objects.get(admin=id)
     token=staff.fcm_token
-    print(id)
-    print(message)
-    print(token)
-    print(staff)
     url="https://fcm.googleapis.com/fcm/send"
     body={
         "notification":{
