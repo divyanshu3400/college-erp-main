@@ -109,7 +109,6 @@ def get_students(request):
                 else:
                     due_date = None 
                 profile_pic_url = student.profile_pic.url if student.profile_pic else ''
-                absolute_profile_pic_url = request.build_absolute_uri(profile_pic_url)
                 
                 data = {
                     'id':student.id,
@@ -124,7 +123,7 @@ def get_students(request):
                     'total_amount': total_amount,
                     'amount_paid': amount_paid,
                     'last_due_date': due_date,
-                    'profile_pic': absolute_profile_pic_url,
+                    'profile_pic': profile_pic_url,
                 }
                 student_data.append(data)
             

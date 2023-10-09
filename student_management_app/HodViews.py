@@ -255,15 +255,7 @@ def edit_student_save(request):
             session_year_id=form.cleaned_data["session_year_id"]
             course_id = form.cleaned_data["course"]
             sex = form.cleaned_data["sex"]
-
-            if request.FILES.get('profile_pic',False):
-                profile_pic=request.FILES['profile_pic']
-                fs=FileSystemStorage()
-                filename=fs.save(profile_pic.name,profile_pic)
-                profile_pic_url=fs.url(filename)
-            else:
-                profile_pic_url=None
-
+            profile_pic=request.FILES['profile_pic']
 
             try:
                 user=CustomUser.objects.get(id=student_id)
@@ -280,8 +272,8 @@ def edit_student_save(request):
                 student.gender=sex
                 course=Courses.objects.get(id=course_id)
                 student.course_id=course
-                if profile_pic_url!=None:
-                    student.profile_pic=profile_pic_url
+                if profile_pic!=None:
+                    student.profile_pic=profile_pic
                 student.save()
                 del request.session['student_id']
                 messages.success(request,"Successfully Edited Student")
