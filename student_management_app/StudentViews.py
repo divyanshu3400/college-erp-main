@@ -6,8 +6,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-from student_management_app.models import Students, Courses, Subjects, CustomUser, Attendance, AttendanceReport, \
-    LeaveReportStudent, FeedBackStudent, NotificationStudent, StudentResult, OnlineClassRoom, SessionYearModel
+from student_management_app.models import *
 
 
 def student_home(request):
@@ -18,7 +17,7 @@ def student_home(request):
     course=Courses.objects.get(id=student_obj.course_id.id)
     subjects=Subjects.objects.filter(course_id=course).count()
     subjects_data=Subjects.objects.filter(course_id=course)
-    session_obj=SessionYearModel.object.get(id=student_obj.session_year_id.id)
+    session_obj=SessionYearModel.objects.get(id=student_obj.session_year_id.id)
     class_room=OnlineClassRoom.objects.filter(subject__in=subjects_data,is_active=True,session_years=session_obj)
 
     subject_name=[]
@@ -36,10 +35,10 @@ def student_home(request):
     return render(request,"student_template/student_home_template.html",{"total_attendance":attendance_total,"attendance_absent":attendance_absent,"attendance_present":attendance_present,"subjects":subjects,"data_name":subject_name,"data1":data_present,"data2":data_absent,"class_room":class_room})
 
 def join_class_room(request,subject_id,session_year_id):
-    session_year_obj=SessionYearModel.object.get(id=session_year_id)
+    session_year_obj=SessionYearModel.objects.get(id=session_year_id)
     subjects=Subjects.objects.filter(id=subject_id)
     if subjects.exists():
-        session=SessionYearModel.object.filter(id=session_year_obj.id)
+        session=SessionYearModel.objects.filter(id=session_year_obj.id)
         if session.exists():
             subject_obj=Subjects.objects.get(id=subject_id)
             course=Courses.objects.get(id=subject_obj.course_id.id)
@@ -175,3 +174,13 @@ def student_view_result(request):
     student=Students.objects.get(admin=request.user.id)
     studentresult=StudentResult.objects.filter(student_id=student.id)
     return render(request,"student_template/student_result.html",{"studentresult":studentresult})
+
+def get_student_fee_logs(request):
+    student=Students.objects.get(admin=request.user.id)
+    student_fee_logs = StudentFeeLogs.objects.filter(student=student.id)
+    try:
+        fee = Fee.objects.get(student=student)
+    except :
+        fee = None
+
+    return render(request,"student_template/fee_details.html",{"fee_logs":student_fee_logs,'student':student,"fee":fee})

@@ -1,10 +1,10 @@
 {% load static %}
-  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <aside style="background-color: rgb(12, 35, 35); color:white; " class="main-sidebar sidebar-light-secondary elevation-2">
     <!-- Brand Logo -->
     <a href="" class="brand-link">
       <img src="{% static 'dist/img/logo_rbc.png' %}" alt="Risebeyond Consultancy" class="brand-image img-circle elevation-3"
            style="opacity: .8">
-      <span class="brand-text font-weight-light">Risebeyond Consultancy</span>
+      <span style="font-size: 1rem;" class="brand-text text-white font-weight-light">Risebeyond Consultancy</span>
     </a>
 
     <!-- Sidebar -->
@@ -12,10 +12,15 @@
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-          <img src="{% static "dist/img/user2-160x160.jpg" %}" class="img-circle elevation-2" alt="User Image">
+          <img src="{{user.students.profile_pic.url}}" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="{% url 'student_profile' %}" class="d-block">{{ user.username }}</a>
+          <a href="{% url 'student_profile' %}" class="d-block text-white">
+            {% if user.first_name %}
+            {{ user.first_name }}
+            {% else %}
+            {{ user.username }}
+            {% endif %}</a>
         </div>
       </div>
 
@@ -26,8 +31,8 @@
                with font-awesome or any other icon font library -->
           <li class="nav-item">
             {% url 'student_home' as student_home %}
-            <a href="{{ student_home }}" class="nav-link {% if request.path == student_home %} active {% endif %}">
-              <i class="nav-icon fas fa-th"></i>
+            <a href="{{ student_home }}" class="nav-link text-white {% if request.path == student_home %} active {% endif %}">
+              <i class="nav-icon fas fa-home"></i>
               <p>
                 Home
               </p>
@@ -36,7 +41,7 @@
           <li class="nav-item">
             {% url 'student_view_attendance' as student_view_attendance %}
             {% url 'student_view_attendance_post' as student_view_attendance_post %}
-            <a href="{{ student_view_attendance }}" class="nav-link {% if request.path == student_view_attendance %} active {% endif %} {% if request.path == student_view_attendance_post %} active {% endif %}">
+            <a href="{{ student_view_attendance }}" class="nav-link text-white {% if request.path == student_view_attendance %} active {% endif %} {% if request.path == student_view_attendance_post %} active {% endif %}">
               <i class="nav-icon fas fa-th"></i>
               <p>
                 View Attendance
@@ -45,7 +50,7 @@
           </li>
            <li class="nav-item">
             {% url 'student_apply_leave' as student_apply_leave %}
-            <a href="{{ student_apply_leave }}" class="nav-link {% if request.path == student_apply_leave %} active {% endif %}">
+            <a href="{{ student_apply_leave }}" class="nav-link text-white {% if request.path == student_apply_leave %} active {% endif %}">
               <i class="nav-icon fas fa-th"></i>
               <p>
                 Apply for Leave
@@ -54,8 +59,8 @@
           </li>
            <li class="nav-item">
             {% url 'student_feedback' as student_feedback %}
-            <a href="{{ student_feedback }}" class="nav-link {% if request.path == student_feedback %} active {% endif %}">
-              <i class="nav-icon fas fa-th"></i>
+            <a href="{{ student_feedback }}" class="nav-link text-white {% if request.path == student_feedback %} active {% endif %}">
+              <i class="nav-icon fas fa-comment"></i>
               <p>
                 Feedback Message
               </p>
@@ -63,7 +68,7 @@
           </li>
           <li class="nav-item">
             {% url 'student_view_result' as student_view_result %}
-            <a href="{{ student_view_result }}" class="nav-link {% if request.path == student_view_result %} active {% endif %}">
+            <a href="{{ student_view_result }}" class="nav-link text-white {% if request.path == student_view_result %} active {% endif %}">
               <i class="nav-icon fas fa-th"></i>
               <p>
                 Grade Card
@@ -72,10 +77,20 @@
           </li>
           <li class="nav-item">
             {% url 'student_all_notification' as student_all_notification %}
-            <a href="{{ student_all_notification }}" class="nav-link {% if request.path == student_all_notification %} active {% endif %}">
-              <i class="nav-icon fas fa-th"></i>
+            <a href="{{ student_all_notification }}" class="nav-link text-white {% if request.path == student_all_notification %} active {% endif %}">
+              <i class="nav-icon fas fa-bell"></i>
               <p>
                 Notifications
+              </p>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            {% url 'fee_logs' as fee_logs %}
+            <a href="{{ fee_logs }}" class="nav-link text-white {% if request.path == fee_logs %} active {% endif %}">
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                Fee Details
               </p>
             </a>
           </li>

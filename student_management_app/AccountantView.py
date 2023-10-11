@@ -1,16 +1,13 @@
 from .models import Students, Fee
-from django.shortcuts import render, get_object_or_404, HttpResponseRedirect, reverse
+from django.shortcuts import render, redirect,get_object_or_404, HttpResponseRedirect, reverse
 from decimal import Decimal
-from django.shortcuts import render, redirect, get_object_or_404
-from django.shortcuts import render, redirect
-import json
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from student_management_app.forms import FeeUpdateForm
 from student_management_app.models import *
+
 
 
 def accountant_home(request):
@@ -114,9 +111,6 @@ def search_students(request):
     return JsonResponse([], safe=False)
 
 
-from django.http import JsonResponse
-from .models import Students, SessionYearModel, Courses
-
 @csrf_exempt
 def get_students(request):
     if request.method == 'POST':
@@ -142,16 +136,21 @@ def formatStudentsData(students):
         fees = Fee.objects.filter(student=student)
         total_amount = sum(fee.total_fee for fee in fees)
         amount_paid = sum(fee.amount_paid for fee in fees)
-        if fees:
-            due_date = max(fee.last_due_date for fee in fees if fee.last_due_date is not None)
-        else:
-            due_date = None 
+
+        fees_with_due_dates = [fee for fee in fees if fee.last_due_date is not None]
         
+        if fees_with_due_dates:
+                due_date = max(fee.last_due_date for fee in fees_with_due_dates)
+
+        else:
+                due_date = None
+
+        print(due_date)
         profile_pic_url = ''
 
         if student.profile_pic:
             profile_pic_url = student.profile_pic.url
-            # profile_pic_url = student.profile_pic.url if student.profile_pic else '' 
+
         data = {
                 'id':student.id,
                 'admin.first_name': student.admin.first_name,
@@ -303,6 +302,8 @@ def update_student_fee(request, student_id):
                         request, f"Amount paid exceeded total fee!!")
                     return HttpResponseRedirect(reverse("update_student_fee", kwargs={"student_id": student.id}))
                 stud_fee.save()
+                StudentFeeLogs.objects.create(student=student,total_fee=total_fee,due_amount=stud_fee.due_amount,amount_paid=pay_amount,due_date=due_date)
+
             else:
                 # Create a new fee object if it doesn't exist
                 fee = Fee.objects.create(
@@ -312,6 +313,8 @@ def update_student_fee(request, student_id):
                     last_due_date=due_date
                 )
                 fee.save()
+
+                StudentFeeLogs.objects.create(student=student,total_fee=total_fee,due_amount=fee.due_amount,amount_paid=pay_amount,due_date=due_date)
         except Exception as e:
             messages.error(request, f"Error updating fee: {str(e)}")
             return HttpResponseRedirect(reverse("update_student_fee", kwargs={"student_id": student.id}))

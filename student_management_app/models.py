@@ -141,6 +141,29 @@ class Students(models.Model):
         verbose_name_plural = 'Students'
 
 
+class StudentFeeLogs(models.Model):
+    id = models.AutoField(primary_key=True)
+    student = models.ForeignKey(Students, on_delete=models.DO_NOTHING)
+    submission_date = models.DateField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    objects = models.Manager()
+    due_amount = models.DecimalField(max_digits=10,decimal_places=2,default=0)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)    
+    due_date = models.DateField(null=True, blank=True)
+
+
+    class Meta:
+        db_table = 'tbl_student_feelog'
+        managed = True
+        verbose_name = 'StudentFeeLog'
+        verbose_name_plural = 'StudentFeeLogs'
+
+    def __str__(self):
+        return f"{self.student.admin.first_name} {self.amount_paid} - {self.submission_date}"
+
+
+
 class Examination(models.Model):
     session_year_id = models.ForeignKey(SessionYearModel, on_delete=models.CASCADE)
     semester = models.IntegerField()

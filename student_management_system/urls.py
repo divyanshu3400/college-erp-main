@@ -108,6 +108,8 @@ urlpatterns = [
     path('list_student_fee', AccountantView.list_student_fee, name="list_student_fee"),
     path('update_student_fee/<int:student_id>/', AccountantView.update_student_fee, name="update_student_fee"),
     path('update_student_fee_save', AccountantView.update_student_fee_save, name="update_student_fee_save"),
+    
+    # student URl path
     path('student_home', StudentViews.student_home, name="student_home"),
     path('student_view_attendance', StudentViews.student_view_attendance, name="student_view_attendance"),
     path('student_view_attendance_post', StudentViews.student_view_attendance_post, name="student_view_attendance_post"),
@@ -123,6 +125,7 @@ urlpatterns = [
     path('student_view_result',StudentViews.student_view_result,name="student_view_result"),
     path('join_class_room/<int:subject_id>/<int:session_year_id>',StudentViews.join_class_room,name="join_class_room"),
     path('node_modules/canvas-designer/widget.html',StaffViews.returnHtmlWidget,name="returnHtmlWidget"),
+    path('fee_logs', StudentViews.get_student_fee_logs, name='fee_logs'),
     path('testurl/',views.Testurl),
     path('get_session_years/', AccountantView.get_session_years, name='get_session_years'),
     path('get_course/', AccountantView.get_course, name='get_course'),

@@ -35,8 +35,10 @@ class AddStudentForm(forms.Form):
         for ses in sessions:
             small_ses = (ses.id, f'{datetime.strftime(ses.session_start_year, "%b-%d, %Y")} To {datetime.strftime(ses.session_end_year, "%b-%d, %Y")}')
             session_list.append(small_ses)
-    except:
+    except Exception as e:
+        print(e)
         session_list=[]
+
 
     gender_choice=(
         ("Male","Male"),
@@ -72,7 +74,6 @@ class EditStudentForm(forms.Form):
 
         for ses in sessions:
             small_ses = (ses.id, f'{datetime.strftime(ses.session_start_year, "%b-%d, %Y")} To {datetime.strftime(ses.session_end_year, "%b-%d, %Y")}')
-            print(f'{datetime.strftime(ses.session_start_year, "%b-%d, %Y")} To {datetime.strftime(ses.session_end_year, "%b-%d, %Y")}')
             session_list.append(small_ses)
     except Exception as e:
         print(e)
