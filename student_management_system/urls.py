@@ -41,6 +41,7 @@ urlpatterns = [
     path('edit_staff/<str:staff_id>', HodViews.edit_staff,name="edit_staff"),
     path('edit_accountant/<str:accountant_id>', HodViews.edit_accountant,name="edit_accountant"),
     path('delete_staff/<str:staff_id>', HodViews.delete_staff,name="delete_staff"),
+    path('delete_accountant/<str:accountant_id>', HodViews.delete_accountant,name="delete_accountant"),
     path('edit_staff_save', HodViews.edit_staff_save,name="edit_staff_save"),
     path('edit_accountant_save', HodViews.edit_accountant_save,name="edit_accountant_save"),
     path('edit_student/<str:student_id>', HodViews.edit_student,name="edit_student"),

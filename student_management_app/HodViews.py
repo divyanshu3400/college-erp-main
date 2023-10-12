@@ -104,14 +104,15 @@ def add_accountant_save(request):
         password=request.POST.get("password")
         address=request.POST.get("address")
         try:
-            user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=2)
-            user.accounant.address=address
+            user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=4)
+            # accountant = Accountant.objects.get(admin=user)
+            user.accountant.address=address
             user.save()
             messages.success(request,"Successfully Added Accountant")
-            return HttpResponseRedirect(reverse("add_staff"))
-        except:
-            messages.error(request,"Failed to Add Staff")
-            return HttpResponseRedirect(reverse("add_staff"))
+            return HttpResponseRedirect(reverse("add_accountant"))
+        except Exception as e:
+            messages.error(request,"Failed to Add Staff"+str(e))
+            return HttpResponseRedirect(reverse("add_accountant"))
 
 def add_course(request):
     return render(request,"hod_template/add_course_template.html")
@@ -199,6 +200,10 @@ def manage_staff(request):
     staffs=Staffs.objects.all()
     return render(request,"hod_template/manage_staff_template.html",{"staffs":staffs})
 
+def manage_accountant(request):
+    accountant=Accountant.objects.all()
+    return render(request,"hod_template/manage_accountant_template.html",{"accountant":accountant})
+
 def manage_student(request):
     students=Students.objects.all()
     return render(request,"hod_template/manage_student_template.html",{"students":students})
@@ -222,15 +227,19 @@ def edit_accountant(request,accountant_id):
 
 def delete_staff(request,staff_id):
     staff=Staffs.objects.get(admin=staff_id)
+    user = CustomUser.objects.get(id=staff.id)
     staff.delete()
+    user.delete()
     messages.error(request, "Deleted Successfully")
     return render(request,"hod_template/manage_staff_template.html")
 
 def delete_accountant(request,accountant_id):
     staff=Accountant.objects.get(admin=accountant_id)
+    user = CustomUser.objects.get(id=staff.id)
     staff.delete()
+    user.delete()
     messages.error(request, "Deleted Successfully")
-    return render(request,"hod_template/manage_staff_template.html")
+    return render(request,"hod_template/manage_accountant_template.html")
 
 
 
