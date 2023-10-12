@@ -68,6 +68,10 @@ def admin_home(request):
 def add_staff(request):
     return render(request,"hod_template/add_staff_template.html")
 
+def add_accountant(request):
+    return render(request,"hod_template/add_accountant_template.html")
+
+
 def add_staff_save(request):
     if request.method!="POST":
         return HttpResponse("Method Not Allowed")
@@ -83,6 +87,27 @@ def add_staff_save(request):
             user.staffs.address=address
             user.save()
             messages.success(request,"Successfully Added Staff")
+            return HttpResponseRedirect(reverse("add_staff"))
+        except:
+            messages.error(request,"Failed to Add Staff")
+            return HttpResponseRedirect(reverse("add_staff"))
+
+
+def add_accountant_save(request):
+    if request.method!="POST":
+        return HttpResponse("Method Not Allowed")
+    else:
+        first_name=request.POST.get("first_name")
+        last_name=request.POST.get("last_name")
+        username=request.POST.get("username")
+        email=request.POST.get("email")
+        password=request.POST.get("password")
+        address=request.POST.get("address")
+        try:
+            user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=2)
+            user.accounant.address=address
+            user.save()
+            messages.success(request,"Successfully Added Accountant")
             return HttpResponseRedirect(reverse("add_staff"))
         except:
             messages.error(request,"Failed to Add Staff")
@@ -124,12 +149,7 @@ def add_student_save(request):
             session_year_id=form.cleaned_data["session_year_id"]
             course_id=form.cleaned_data["course"]
             sex=form.cleaned_data["sex"]
-
             profile_pic=request.FILES['profile_pic']
-            # fs=FileSystemStorage()
-            # filename=fs.save(profile_pic.name,profile_pic)
-            # profile_pic_url=fs.url(filename)
-
             try:
                 user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=3)
                 user.students.address=address
@@ -195,11 +215,23 @@ def edit_staff(request,staff_id):
     staff=Staffs.objects.get(admin=staff_id)
     return render(request,"hod_template/edit_staff_template.html",{"staff":staff,"id":staff_id})
 
+def edit_accountant(request,accountant_id):
+    accountant=Accountant.objects.get(admin=accountant_id)
+    return render(request,"hod_template/edit_accountant_template.html",{"accountant":accountant,"id":accountant_id})
+
+
 def delete_staff(request,staff_id):
     staff=Staffs.objects.get(admin=staff_id)
     staff.delete()
     messages.error(request, "Deleted Successfully")
     return render(request,"hod_template/manage_staff_template.html")
+
+def delete_accountant(request,accountant_id):
+    staff=Accountant.objects.get(admin=accountant_id)
+    staff.delete()
+    messages.error(request, "Deleted Successfully")
+    return render(request,"hod_template/manage_staff_template.html")
+
 
 
 def edit_staff_save(request):
@@ -229,6 +261,34 @@ def edit_staff_save(request):
         except:
             messages.error(request,"Failed to Edit Staff")
             return HttpResponseRedirect(reverse("edit_staff",kwargs={"staff_id":staff_id}))
+
+def edit_accountant_save(request):
+    if request.method!="POST":
+        return HttpResponse("<h2>Method Not Allowed</h2>")
+    else:
+        accountant_id=request.POST.get("accountant_id")
+        first_name=request.POST.get("first_name")
+        last_name=request.POST.get("last_name")
+        email=request.POST.get("email")
+        username=request.POST.get("username")
+        address=request.POST.get("address")
+
+        try:
+            user=CustomUser.objects.get(id=accountant_id)
+            user.first_name=first_name
+            user.last_name=last_name
+            user.email=email
+            user.username=username
+            user.save()
+
+            staff_model=Accountant.objects.get(admin=accountant_id)
+            staff_model.address=address
+            staff_model.save()
+            messages.success(request,"Successfully Edited Accountant")
+            return HttpResponseRedirect(reverse("edit_accountant",kwargs={"accountant_id":accountant_id}))
+        except:
+            messages.error(request,"Failed to Edit Accountant")
+            return HttpResponseRedirect(reverse("edit_accountant",kwargs={"accountant_id":accountant_id}))
 
 def edit_student(request,student_id):
     request.session['student_id']=student_id

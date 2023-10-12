@@ -36,6 +36,8 @@
             </p>
           </a>
         </li>
+<!-- start navigation for staff -->
+
 
         <li class="nav-item">
           {% url 'add_staff' as add_staff %}
@@ -57,6 +59,33 @@
             </p>
           </a>
         </li>
+<!-- end navigation for student -->
+
+<!-- navigation for accountants -->
+        <li class="nav-item">
+          {% url 'add_accountant' as add_accountant %}
+          <a href="{{ add_accountant }}" class="nav-link text-white {% if request.path == add_accountant %} active {% endif %}">
+            <i class="nav-icon fa fa-user-plus"></i>
+            <p>
+              Add Accountant
+            </p>
+          </a>
+        </li>
+        <li class="nav-item">
+          {% url 'manage_accountant' as manage_accountant %}
+          {% url 'edit_accountant' accountant_id=id as edit_accountant %}
+          <a href="{% url 'manage_accountant' %}"
+            class="nav-link text-white {% if request.path == manage_accountant %} active {% endif %} {% if request.path == edit_accountant %} active {% endif %}">
+            <i class="nav-icon fas fa-users"></i>
+            <p>
+              Manage Accountant
+            </p>
+          </a>
+        </li>
+<!-- end navigation for accountants -->
+
+<!-- start navigation for student -->
+
         <li class="nav-item">
           {% url 'add_student' as add_student %}
           <a href="{% url 'add_student' %}" class="nav-link text-white {% if request.path == add_student %} active {% endif %}">
@@ -77,6 +106,8 @@
             </p>
           </a>
         </li>
+<!-- end navigation for student -->
+
         <li class="nav-item">
           {% url 'add_course' as add_course %}
           <a href="{% url 'add_course' %}" class="nav-link text-white {% if request.path == add_course %} active {% endif %}">
